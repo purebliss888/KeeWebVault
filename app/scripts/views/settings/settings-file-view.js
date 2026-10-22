@@ -307,7 +307,7 @@ class SettingsFileView extends View {
                 chars[i] = String.fromCharCode(bytes[i]);
             }
 
-            const base64 = btoa(chars.join(''));
+            const kdbxBase64 = btoa(chars.join(''));
 
             const documentRoot = window.__keewebEmbeddedBaseDocument.cloneNode(true);
 
@@ -319,12 +319,25 @@ class SettingsFileView extends View {
                 <p>KeeWeb is a password manager written in JavaScript. Please enable JavaScript to run it.</p>
             </noscript>
             <template id="keeweb-embedded-kdbx" data-name=""></template>
+            <template id="keeweb-embedded-settings" data-version="1"></template>
         `;
 
-            const template = body.querySelector('#keeweb-embedded-kdbx');
+            const kdbxTemplate = body.querySelector('#keeweb-embedded-kdbx');
 
-            template.setAttribute('data-name', this.model.name + '.kdbx');
-            template.innerHTML = base64;
+            kdbxTemplate.setAttribute('data-name', this.model.name + '.kdbx');
+            kdbxTemplate.innerHTML = kdbxBase64;
+
+            const settingsTemplate = body.querySelector('#keeweb-embedded-settings');
+
+            const settingsJson = JSON.stringify(AppSettingsModel.getEmbeddedSettings());
+            const settingsBytes = new TextEncoder().encode(settingsJson);
+            const settingsChars = [];
+
+            for (const byte of settingsBytes) {
+                settingsChars.push(String.fromCharCode(byte));
+            }
+
+            settingsTemplate.innerHTML = btoa(settingsChars.join(''));
 
             const html = '<!DOCTYPE html>' + documentRoot.outerHTML;
 
